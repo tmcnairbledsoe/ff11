@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "phantomjs": "^2.1.7",
+    "selenium": "^2.20.0"
+  }
+}
