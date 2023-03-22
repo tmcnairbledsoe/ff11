@@ -1,5 +1,4 @@
 import pyscreenshot as ImageGrab
-import pytesseract
 import time
 import pydirectinput
 import random
@@ -13,7 +12,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By 
 from webdriver_manager.chrome import ChromeDriverManager
 
-pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 options = webdriver.ChromeOptions() 
 options.add_argument('--headless') 
 options.page_load_strategy = 'none' 
@@ -23,7 +21,7 @@ driver = Chrome(options=options, service=chrome_service)
 driver.implicitly_wait(5)
 
 #config
-waitFirst = True
+waitFirst = False
 waitEver = True
 secondsToEnd = 999999999
 logPath = 'C:/FF11/HorizonXI/Game/chatlogs/*'
@@ -38,6 +36,10 @@ timeurl = "http://www.pyogenes.com/ffxi/timer/v2.html"
 driver.get(timeurl) 
 time.sleep(5)
 content = driver.find_element(By.ID, "vTime")
+X1 = int(screenWidth * .1)
+Y1 = int(screenHeight * .2)
+X2 = int(screenWidth * .9)
+Y2 = int(screenHeight * .5)
 
 begin = time.time()
 
@@ -50,6 +52,22 @@ while(True):
     logout=False
     wait=False
     lasttime = time.time()
+    im = ImageGrab.grab(bbox=(X1, Y1, X2, Y2)) 
+    # im.save('test.png')
+    pix = im.load()
+
+    rl,gl,bl = pix[int((X2 - X1) * .14),int((Y2 - Y1) * .66)]
+    rl2,gl2,bl2 = pix[int((X2 - X1) * .15),int((Y2 - Y1) * .66)]
+    rl3,gl3,bl3 = pix[int((X2 - X1) * .16),int((Y2 - Y1) * .66)]
+    rr,gr,br = pix[int((X2 - X1) * .86),int((Y2 - Y1) * .66)]
+    rr2,gr2,br2 = pix[int((X2 - X1) * .85),int((Y2 - Y1) * .66)]
+    rr3,gr3,br3 = pix[int((X2 - X1) * .84),int((Y2 - Y1) * .66)]
+    baserl = rl + rl2 + rl3
+    basegl = gl + gl2 + gl3
+    basebl = bl + bl2 + bl3
+    baserr = rr + rr2 + rr3
+    basegr = gr + gr2 +gr3
+    basebr = br + br2 + br3
 
     latest_file = max(list_of_files, key=os.path.getctime)
     logfile = open(latest_file)
@@ -70,17 +88,19 @@ while(True):
         lasttime = time.time()
 
     while(searching):
-        line = logfile.readline()
-        if not line:
-            time.sleep(0.1) # Sleep briefly
-            continue
-        print(line)
         laptime = round((time.time() - lasttime), 2)
         if(laptime > 25):
             searching = False
             fish = False
             pydirectinput.press('esc')
             time.sleep(random.randint(4,6))
+
+        line = logfile.readline()
+        if not line:
+            time.sleep(0.1) # Sleep briefly
+            continue
+        print(line)
+
         if "Something caught the hook!!!" in line or "You feel something pulling at your line." in line or "Something clamps onto your line ferociously!" in line or "You didn't catch anything." in line:
             fish = False
             searching = False
@@ -118,7 +138,7 @@ while(True):
                 failCount = failCount + 99
         if "pulling at" in line or "You didn't catch anything." in line:
             shouldWaitCount = shouldWaitCount + 1
-            if shouldWaitCount > 4:
+            if shouldWaitCount > 3:
                 searching = False
                 wait = True
                 shouldWaitCount = 0
@@ -151,45 +171,41 @@ while(True):
             pydirectinput.press('enter')
             break
 
-    lasttime = time.time()
     while(fish):
-        X1 = int(screenWidth * .078125)
-        Y1 = int(screenHeight * .20833)
-        X2 = int(screenWidth * .9375)
-        Y2 = int(screenHeight * .55555)
         im = ImageGrab.grab(bbox=(X1, Y1, X2, Y2)) 
+        # im.save('test.png')
         pix = im.load()
 
-        rl,gl,bl = pix[int((X2 - X1) * .16545),int((Y2 - Y1) * .56)]
-        rr,gr,br = pix[int((X2 - X1) * .81818),int((Y2 - Y1) * .56)]
-        rm,gm,bm = pix[int((X2 - X1) * .45863),int((Y2 - Y1) * .024)]
-        # print(rl)
-        # print(gl)
-        # print(bl)
-        # print(rr)
-        # print(gr)
-        # print(br)
-        # print(rm)
-        # print(gm)
-        # print(bm)
-        # print('ok')
-        if(rl > 105 or bl > 105 or gl > 105):
+        rl,gl,bl = pix[int((X2 - X1) * .14),int((Y2 - Y1) * .66)]
+        rl2,gl2,bl2 = pix[int((X2 - X1) * .15),int((Y2 - Y1) * .66)]
+        rl3,gl3,bl3 = pix[int((X2 - X1) * .16),int((Y2 - Y1) * .66)]
+        rr,gr,br = pix[int((X2 - X1) * .86),int((Y2 - Y1) * .66)]
+        rr2,gr2,br2 = pix[int((X2 - X1) * .85),int((Y2 - Y1) * .66)]
+        rr3,gr3,br3 = pix[int((X2 - X1) * .84),int((Y2 - Y1) * .66)]
+        rm,gm,bm = pix[int((X2 - X1) * .465),int((Y2 - Y1) * .074)]
+
+        rlt = rl + rl2 + rl3
+        glt = gl + gl2 + gl3
+        blt = bl + bl2 + bl3
+        rrt = rr + rr2 + rr3
+        grt = gr + gr2 +gr3
+        brt = br + br2 + br3
+        
+        if(rlt > baserl + 50 or glt > basegl + 50 or blt > basebl + 50):
             print('L')
-            lasttime = time.time()
+            # im.save('l.png')
             pydirectinput.press(goleft)
             time.sleep(.2)
-        if(rr > 105 or br > 105 or gr > 105):
+        elif(rrt > baserr + 50 or grt > basegr + 50 or brt > basebr + 50):
             print('R')
-            lasttime = time.time()
+            # im.save('r.png')
             pydirectinput.press(goright)
             time.sleep(.2)
-        
-        if rm < 200:
+        elif rm < 200:
+            print('enter')
             pydirectinput.press('enter')
             fish = False
-            time.sleep(random.randint(5,6))
-
-    lasttime = time.time()
+            time.sleep(8)
 
     line = logfile.readline()
     print(line)
@@ -209,8 +225,6 @@ while(True):
             if hourDigit == 0 or hourDigit == 4 or hourDigit == 6 or hourDigit == 7 or hourDigit == 17 or hourDigit == 18 or hourDigit == 20:
                 wait = False
         prevHour = hourDigit
-        
-        lasttime = time.time()
 
         line = logfile.readline()
         if not line:
