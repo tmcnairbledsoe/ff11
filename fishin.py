@@ -27,11 +27,9 @@ secondsToEnd = 999999999
 logPath = 'C:/FF11/HorizonXI/Game/chatlogs/*'
 goleft = 'a'
 goright = 'd'
-failCount = 0
-shouldWaitCount = 0
 screenWidth = GetSystemMetrics(0)
 screenHeight = GetSystemMetrics(1)
-fishToCatch= 'eel'
+fishToCatch= 'blue'
 timeurl = "http://www.pyogenes.com/ffxi/timer/v2.html"
 driver.get(timeurl) 
 time.sleep(5)
@@ -40,6 +38,9 @@ X1 = int(screenWidth * .1)
 Y1 = int(screenHeight * .2)
 X2 = int(screenWidth * .9)
 Y2 = int(screenHeight * .5)
+shouldWaitCount = 0
+failCount = 0
+redY = -1
 
 begin = time.time()
 
@@ -87,6 +88,8 @@ while(True):
         pydirectinput.press('enter')
         lasttime = time.time()
 
+    if searching:
+        print('search')
     while(searching):
         laptime = round((time.time() - lasttime), 2)
         if(laptime > 25):
@@ -105,10 +108,14 @@ while(True):
             fish = False
             searching = False
             failCount = 0
-            shouldWaitCount = 0
             time.sleep(1)
             pydirectinput.press('esc')
             time.sleep(random.randint(5,6))
+            shouldWaitCount = shouldWaitCount + 1
+            print(shouldWaitCount)
+            if shouldWaitCount > 3:
+                searching = False
+                wait = True
         elif "Something caught the hook!" in line:
             line = logfile.readline()
             print(line)
@@ -120,12 +127,10 @@ while(True):
                 fish = True
                 searching = False
                 failCount = 0
-                shouldWaitCount = 0
             else:
                 fish = False
                 searching = False
                 failCount = 0
-                shouldWaitCount = 0
                 time.sleep(1)
                 pydirectinput.press('esc')
                 time.sleep(random.randint(5,6))
@@ -133,18 +138,13 @@ while(True):
             failCount = failCount + 1
             searching = False
             logout=True
-            shouldWaitCount = 0
             if "Nohrin regretfully" in line:
                 failCount = failCount + 99
-        if "pulling at" in line or "You didn't catch anything." in line:
-            shouldWaitCount = shouldWaitCount + 1
-            if shouldWaitCount > 3:
-                searching = False
-                wait = True
-                shouldWaitCount = 0
 
     totaltime = round((time.time() - begin), 2)
 
+    if logout:
+        print('fail')
     if(logout == True or totaltime > secondsToEnd):
         if failCount < 3:
             pydirectinput.press('/')
@@ -171,10 +171,21 @@ while(True):
             pydirectinput.press('enter')
             break
 
+    if fish:
+        print('fish')
+        shouldWaitCount = 0
     while(fish):
         im = ImageGrab.grab(bbox=(X1, Y1, X2, Y2)) 
         # im.save('test.png')
         pix = im.load()
+
+        if redY == -1:
+            for i in range(1, Y2 - Y1):
+                r,g,b = pix[int((X2 - X1) * .465),int(i)]
+                if r > 200:
+                    print(i)
+                    redY = i
+                    break
 
         rl,gl,bl = pix[int((X2 - X1) * .14),int((Y2 - Y1) * .66)]
         rl2,gl2,bl2 = pix[int((X2 - X1) * .15),int((Y2 - Y1) * .66)]
@@ -182,7 +193,7 @@ while(True):
         rr,gr,br = pix[int((X2 - X1) * .86),int((Y2 - Y1) * .66)]
         rr2,gr2,br2 = pix[int((X2 - X1) * .85),int((Y2 - Y1) * .66)]
         rr3,gr3,br3 = pix[int((X2 - X1) * .84),int((Y2 - Y1) * .66)]
-        rm,gm,bm = pix[int((X2 - X1) * .465),int((Y2 - Y1) * .074)]
+        rm,gm,bm = pix[int((X2 - X1) * .465),int(redY)]
 
         rlt = rl + rl2 + rl3
         glt = gl + gl2 + gl3
@@ -195,14 +206,14 @@ while(True):
             print('L')
             # im.save('l.png')
             pydirectinput.press(goleft)
-            time.sleep(.2)
+            time.sleep(.4)
         elif(rrt > baserr + 50 or grt > basegr + 50 or brt > basebr + 50):
             print('R')
             # im.save('r.png')
             pydirectinput.press(goright)
-            time.sleep(.2)
+            time.sleep(.4)
         elif rm < 200:
-            print('enter')
+            print('catch')
             pydirectinput.press('enter')
             fish = False
             time.sleep(8)
@@ -217,8 +228,10 @@ while(True):
 
     prevHour = int(content.text[len(content.text) - 8:len(content.text) - 6])
 
+    if wait:
+        print('wait')
+        shouldWaitCount = 0
     while(wait and waitEver):
-
         hourDigit = int(content.text[len(content.text) - 8:len(content.text) - 6])
 
         if hourDigit != prevHour:
