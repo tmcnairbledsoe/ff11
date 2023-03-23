@@ -21,7 +21,7 @@ driver = Chrome(options=options, service=chrome_service)
 driver.implicitly_wait(5)
 
 #config
-waitFirst = False
+waitFirst = True
 waitEver = True
 secondsToEnd = 999999999
 logPath = 'C:/FF11/HorizonXI/Game/chatlogs/*'
@@ -41,6 +41,17 @@ Y2 = int(screenHeight * .5)
 shouldWaitCount = 0
 failCount = 0
 redY = -1
+line = None
+
+#function
+def typeout(stringToType):
+    for char in stringToType:
+        if char == ' ':
+            pydirectinput.press('space')
+        else:
+            pydirectinput.press(char)
+    pydirectinput.press('enter')
+    
 
 begin = time.time()
 
@@ -80,16 +91,11 @@ while(True):
         searching = False
         fish = False
     else:
-        pydirectinput.press('/')
-        pydirectinput.press('f')
-        pydirectinput.press('i')
-        pydirectinput.press('s')
-        pydirectinput.press('h')
-        pydirectinput.press('enter')
+        typeout('/fish')
         lasttime = time.time()
 
     if searching:
-        print('search')
+        print('cast')
     while(searching):
         laptime = round((time.time() - lasttime), 2)
         if(laptime > 25):
@@ -98,7 +104,10 @@ while(True):
             pydirectinput.press('esc')
             time.sleep(random.randint(4,6))
 
-        line = logfile.readline()
+        try:
+            line = logfile.readline()
+        except:
+            line = None
         if not line:
             time.sleep(0.1) # Sleep briefly
             continue
@@ -117,59 +126,47 @@ while(True):
                 searching = False
                 wait = True
         elif "Something caught the hook!" in line:
-            line = logfile.readline()
+            failCount = 0
+            try:
+                line = logfile.readline()
+            except:
+                line = None
             print(line)
             while not line:
-                line = logfile.readline()
+                try:
+                    line = logfile.readline()
+                except:
+                    line = None
                 print(line)
 
             if ("You have a good feeling about this one!" in line or "Your keen angler's senses tell you that this is the pull of" in line) and "crayfish" not in line :
                 fish = True
                 searching = False
-                failCount = 0
             else:
                 fish = False
                 searching = False
-                failCount = 0
                 time.sleep(1)
                 pydirectinput.press('esc')
                 time.sleep(random.randint(5,6))
-        if "fish without bait" in line or "Nohrin regretfully" in line or "cannot fish here" in line:
+        elif "fish without bait" in line:
             failCount = failCount + 1
+            if failCount < 3:
+                print('equipset 1')
+                typeout('/equipset 1')
+            else:
+                logout=True
+            searching = False
+        elif "Nohrin regretfully" in line or "cannot fish here" in line:
             searching = False
             logout=True
-            if "Nohrin regretfully" in line:
-                failCount = failCount + 99
 
     totaltime = round((time.time() - begin), 2)
 
     if logout:
-        print('fail')
+        print('logout')
     if(logout == True or totaltime > secondsToEnd):
-        if failCount < 3:
-            pydirectinput.press('/')
-            pydirectinput.press('e')
-            pydirectinput.press('q')
-            pydirectinput.press('u')
-            pydirectinput.press('i')
-            pydirectinput.press('p')
-            pydirectinput.press('s')
-            pydirectinput.press('e')
-            pydirectinput.press('t')
-            pydirectinput.press('space')
-            pydirectinput.press('1')
-            pydirectinput.press('enter')
-            logout = False
-        else:
-            pydirectinput.press('/')
-            pydirectinput.press('l')
-            pydirectinput.press('o')
-            pydirectinput.press('g')
-            pydirectinput.press('o')
-            pydirectinput.press('u')
-            pydirectinput.press('t')
-            pydirectinput.press('enter')
-            break
+        typeout('/logout')
+        break
 
     if fish:
         print('fish')
@@ -218,28 +215,37 @@ while(True):
             fish = False
             time.sleep(8)
 
-    line = logfile.readline()
+    try:
+        line = logfile.readline()
+    except:
+        line = None
     print(line)
     while line:
-        line = logfile.readline()
+        try:
+            line = logfile.readline()
+        except:
+            line = None
         print(line)
         if fishToCatch in line:
             wait = False
 
-    prevHour = int(content.text[len(content.text) - 8:len(content.text) - 6])
-
     if wait:
-        print('wait')
+        prevHour = int(content.text[len(content.text) - 8:len(content.text) - 6])
+        print('wait: ' + str(prevHour))
         shouldWaitCount = 0
     while(wait and waitEver):
         hourDigit = int(content.text[len(content.text) - 8:len(content.text) - 6])
 
         if hourDigit != prevHour:
+            print(hourDigit)
             if hourDigit == 0 or hourDigit == 4 or hourDigit == 6 or hourDigit == 7 or hourDigit == 17 or hourDigit == 18 or hourDigit == 20:
                 wait = False
         prevHour = hourDigit
 
-        line = logfile.readline()
+        try:
+            line = logfile.readline()
+        except:
+            line = None
         if not line:
             time.sleep(0.1) # Sleep briefly
             continue
