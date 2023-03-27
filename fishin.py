@@ -21,15 +21,15 @@ driver = Chrome(options=options, service=chrome_service)
 driver.implicitly_wait(5)
 
 #config
-waitFirst = True
+waitFirst = False
 waitEver = True
-secondsToEnd = 999999999
+hourToEnd = 2
 logPath = 'C:/FF11/HorizonXI/Game/chatlogs/*'
 goleft = 'a'
 goright = 'd'
 screenWidth = GetSystemMetrics(0)
 screenHeight = GetSystemMetrics(1)
-fishToCatch= 'blue'
+fishToCatch= 'bluetail'
 timeurl = "http://www.pyogenes.com/ffxi/timer/v2.html"
 driver.get(timeurl) 
 time.sleep(5)
@@ -51,9 +51,6 @@ def typeout(stringToType):
         else:
             pydirectinput.press(char)
     pydirectinput.press('enter')
-    
-
-begin = time.time()
 
 while(True):
     if datetime.now().hour == 24 and (datetime.now().minute == 58 or datetime.now().minute == 59):
@@ -92,7 +89,6 @@ while(True):
         fish = False
     else:
         typeout('/fish')
-        lasttime = time.time()
 
     if searching:
         print('cast')
@@ -160,11 +156,9 @@ while(True):
             searching = False
             logout=True
 
-    totaltime = round((time.time() - begin), 2)
-
     if logout:
         print('logout')
-    if(logout == True or totaltime > secondsToEnd):
+    if(logout == True or datetime.now().hour == hourToEnd):
         typeout('/logout')
         break
 
@@ -199,7 +193,12 @@ while(True):
         grt = gr + gr2 +gr3
         brt = br + br2 + br3
         
-        if(rlt > baserl + 50 or glt > basegl + 50 or blt > basebl + 50):
+        if rm < 200:
+            print('catch')
+            pydirectinput.press('enter')
+            fish = False
+            time.sleep(8)
+        elif(rlt > baserl + 50 or glt > basegl + 50 or blt > basebl + 50):
             print('L')
             # im.save('l.png')
             pydirectinput.press(goleft)
@@ -209,11 +208,6 @@ while(True):
             # im.save('r.png')
             pydirectinput.press(goright)
             time.sleep(.4)
-        elif rm < 200:
-            print('catch')
-            pydirectinput.press('enter')
-            fish = False
-            time.sleep(8)
 
     try:
         line = logfile.readline()
