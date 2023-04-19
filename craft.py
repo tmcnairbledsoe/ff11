@@ -31,5 +31,5 @@ while(True):
     pydirectinput.keyDown('9')
     pydirectinput.keyUp('9')
     pydirectinput.keyUp('ctrl')
-    time.sleep(130)
+    time.sleep(150)
 

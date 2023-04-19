@@ -23,13 +23,13 @@ driver.implicitly_wait(5)
 #config
 waitFirst = False
 waitEver = True
-hourToEnd = 2
+hourToEnd = 4
 logPath = 'C:/FF11/HorizonXI/Game/chatlogs/*'
 goleft = 'a'
 goright = 'd'
 screenWidth = GetSystemMetrics(0)
 screenHeight = GetSystemMetrics(1)
-fishToCatch= 'bluetail'
+fishToCatch= 'crescent'
 timeurl = "http://www.pyogenes.com/ffxi/timer/v2.html"
 driver.get(timeurl) 
 time.sleep(5)
@@ -109,7 +109,7 @@ while(True):
             continue
         print(line)
 
-        if "Something caught the hook!!!" in line or "You feel something pulling at your line." in line or "Something clamps onto your line ferociously!" in line or "You didn't catch anything." in line:
+        if "Something caught the hook!!!" in line or "You feel something pulling at your line." in line or "Something clamps onto your line ferociously!" in line or "You didn't catch anything." in line or "You cannot use that command" in line:
             fish = False
             searching = False
             failCount = 0
@@ -146,7 +146,7 @@ while(True):
                 time.sleep(random.randint(5,6))
         elif "fish without bait" in line:
             failCount = failCount + 1
-            if failCount < 3:
+            if failCount < 9:
                 print('equipset 1')
                 typeout('/equipset 1')
             else:
@@ -155,7 +155,7 @@ while(True):
         elif "Nohrin regretfully" in line or "cannot fish here" in line:
             searching = False
             logout=True
-
+            
     if logout:
         print('logout')
     if(logout == True or datetime.now().hour == hourToEnd):
