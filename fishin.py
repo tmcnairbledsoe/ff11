@@ -108,6 +108,8 @@ while(True):
             time.sleep(0.1) # Sleep briefly
             continue
         print(line)
+        if fishToCatch in line:
+            shouldWaitCount = 0
 
         if "Something caught the hook!!!" in line or "You feel something pulling at your line." in line or "Something clamps onto your line ferociously!" in line or "You didn't catch anything." in line or "You cannot use that command" in line:
             fish = False
@@ -159,8 +161,13 @@ while(True):
             pydirectinput.press('enter')
             pydirectinput.press('enter')
             pydirectinput.press('enter')
+            time.sleep(30)
+            failCount = failCount + 1
+            if failCount < 3:
+                pydirectinput.press('enter')
+            else:
+                logout=True
             searching = False
-            logout=True
             
     if logout:
         print('logout')
