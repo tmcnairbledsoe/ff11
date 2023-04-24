@@ -23,13 +23,13 @@ driver.implicitly_wait(5)
 #config
 waitFirst = False
 waitEver = True
-hourToEnd = 4
+hourToEnd = 3
 logPath = 'C:/FF11/HorizonXI/Game/chatlogs/*'
 goleft = 'a'
 goright = 'd'
 screenWidth = GetSystemMetrics(0)
 screenHeight = GetSystemMetrics(1)
-fishToCatch= 'crescent'
+fishToCatch= 'black sole'
 timeurl = "http://www.pyogenes.com/ffxi/timer/v2.html"
 driver.get(timeurl) 
 time.sleep(5)
@@ -118,7 +118,7 @@ while(True):
             time.sleep(random.randint(5,6))
             shouldWaitCount = shouldWaitCount + 1
             print(shouldWaitCount)
-            if shouldWaitCount > 3:
+            if shouldWaitCount > 4:
                 searching = False
                 wait = True
         elif "Something caught the hook!" in line:
@@ -146,13 +146,19 @@ while(True):
                 time.sleep(random.randint(5,6))
         elif "fish without bait" in line:
             failCount = failCount + 1
-            if failCount < 9:
+            if failCount < 3:
                 print('equipset 1')
                 typeout('/equipset 1')
             else:
                 logout=True
             searching = False
         elif "Nohrin regretfully" in line or "cannot fish here" in line:
+            searching = False
+            logout=True
+        elif "You cannot use that command while unconscious" in line:
+            pydirectinput.press('enter')
+            pydirectinput.press('enter')
+            pydirectinput.press('enter')
             searching = False
             logout=True
             
@@ -197,7 +203,7 @@ while(True):
             print('catch')
             pydirectinput.press('enter')
             fish = False
-            time.sleep(8)
+            time.sleep(9)
         elif(rlt > baserl + 50 or glt > basegl + 50 or blt > basebl + 50):
             print('L')
             # im.save('l.png')
