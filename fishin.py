@@ -23,16 +23,18 @@ driver.implicitly_wait(5)
 #config
 waitFirst = False
 waitEver = True
-hourToEnd = 3
+hourToEnd = 2
+waitLimit = 5
 logPath = 'C:/FF11/HorizonXI/Game/chatlogs/*'
 goleft = 'a'
 goright = 'd'
 screenWidth = GetSystemMetrics(0)
 screenHeight = GetSystemMetrics(1)
 fishToCatch= 'black sole'
+fishSecond=False
+changeToFishFirst=False
 timeurl = "http://www.pyogenes.com/ffxi/timer/v2.html"
 driver.get(timeurl) 
-time.sleep(5)
 content = driver.find_element(By.ID, "vTime")
 X1 = int(screenWidth * .1)
 Y1 = int(screenHeight * .2)
@@ -52,6 +54,8 @@ def typeout(stringToType):
             pydirectinput.press(char)
     pydirectinput.press('enter')
 
+time.sleep(5)
+typeout('/equipset 1')
 while(True):
     if datetime.now().hour == 24 and (datetime.now().minute == 58 or datetime.now().minute == 59):
         time.sleep(120)
@@ -82,6 +86,18 @@ while(True):
     logfile = open(latest_file)
     logfile.seek(0,2) # Go to the end of the file
 
+    hourDigit = int(content.text[len(content.text) - 8:len(content.text) - 6])
+    if hourDigit == 0 or hourDigit == 4 or hourDigit == 6 or hourDigit == 7 or hourDigit == 17 or hourDigit == 18 or hourDigit == 20:
+        if fishSecond:
+            changeToFishFirst = True
+
+    if changeToFishFirst:
+        fishSecond = False
+        print('equipset 1')
+        typeout('/equipset 1')
+        changeToFishFirst = False
+        shouldWaitCount = 0
+
     if waitFirst == True:
         waitFirst = False
         wait = True
@@ -110,6 +126,8 @@ while(True):
         print(line)
         if fishToCatch in line:
             shouldWaitCount = 0
+            if fishSecond:
+                changeToFishFirst = True
 
         if "Something caught the hook!!!" in line or "You feel something pulling at your line." in line or "Something clamps onto your line ferociously!" in line or "You didn't catch anything." in line or "You cannot use that command" in line:
             fish = False
@@ -120,7 +138,7 @@ while(True):
             time.sleep(random.randint(5,6))
             shouldWaitCount = shouldWaitCount + 1
             print(shouldWaitCount)
-            if shouldWaitCount > 4:
+            if shouldWaitCount >= waitLimit:
                 searching = False
                 wait = True
         elif "Something caught the hook!" in line:
@@ -136,6 +154,11 @@ while(True):
                 except:
                     line = None
                 print(line)
+            
+            if fishToCatch in line:
+                shouldWaitCount = 0
+                if fishSecond:
+                    changeToFishFirst = True
 
             if ("You have a good feeling about this one!" in line or "Your keen angler's senses tell you that this is the pull of" in line) and "crayfish" not in line :
                 fish = True
@@ -146,7 +169,7 @@ while(True):
                 time.sleep(1)
                 pydirectinput.press('esc')
                 time.sleep(random.randint(5,6))
-        elif "fish without bait" in line:
+        elif "fish without bait" in line or "can't fish without a rod in your hands" in line:
             failCount = failCount + 1
             if failCount < 3:
                 print('equipset 1')
@@ -169,9 +192,8 @@ while(True):
                 logout=True
             searching = False
             
-    if logout:
-        print('logout')
     if(logout == True or datetime.now().hour == hourToEnd):
+        print('logout')
         typeout('/logout')
         break
 
@@ -234,19 +256,29 @@ while(True):
             line = None
         print(line)
         if fishToCatch in line:
+            shouldWaitCount = 0
             wait = False
+            if fishSecond:
+                changeToFishFirst = True
 
     if wait:
         prevHour = int(content.text[len(content.text) - 8:len(content.text) - 6])
         print('wait: ' + str(prevHour))
         shouldWaitCount = 0
+        if fishSecond == False:
+            fishSecond = True
+            wait = False
+            print('equipset 20')
+            typeout('/equipset 20')
     while(wait and waitEver):
+        changeToFishFirst = True
         hourDigit = int(content.text[len(content.text) - 8:len(content.text) - 6])
 
         if hourDigit != prevHour:
             print(hourDigit)
             if hourDigit == 0 or hourDigit == 4 or hourDigit == 6 or hourDigit == 7 or hourDigit == 17 or hourDigit == 18 or hourDigit == 20:
                 wait = False
+                time.sleep(random.randint(1,10))
         prevHour = hourDigit
 
         try:
@@ -254,9 +286,10 @@ while(True):
         except:
             line = None
         if not line:
-            time.sleep(0.1) # Sleep briefly
+            time.sleep(0.1)
             continue
         print(line)
 
         if fishToCatch in line:
             wait = False
+            shouldWaitCount = 0
